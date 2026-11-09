@@ -1,0 +1,62 @@
+{% extends "admin/layout.html" %}
+{% block title %}Overview{% endblock %}
+{% block heading %}Overview{% endblock %}
+{% block content %}
+<h1 class="page-title">Welcome back, <span class="gradient-text">{{ current_user.username }}</span></h1>
+<p class="muted">This is your private headquarters. Everything shown here comes from your real data.</p>
+
+<section class="card welcome">
+  <h2>Your digital headquarters</h2>
+  <p class="muted">Build in public, ship steadily and let real work speak for you. You have <strong>{{ active_goals }}</strong> active goal(s) and <strong>{{ done_goals }}</strong> completed. <a href="{{ url_for('admin_goals.index') }}">Open goals →</a></p>
+</section>
+
+<div class="stats">
+  <div class="stat"><small>PUBLISHED PROJECTS</small><strong>{{ published }}</strong></div>
+  <div class="stat"><small>DRAFTS (HIDDEN)</small><strong>{{ drafts }}</strong></div>
+  <div class="stat"><small>NEW ENQUIRIES</small><strong>{{ new_leads }}</strong></div>
+  <div class="stat"><small>VISITORS, LAST 7 DAYS</small><strong>{{ visitors_7d }}</strong></div>
+</div>
+
+<div class="row-actions">
+  <a class="btn btn-primary" href="{{ url_for('admin_projects.new') }}">+ Add project</a>
+  <a class="btn btn-ghost" href="{{ url_for('analytics.index') }}">View analytics</a>
+  <a class="btn btn-ghost" href="{{ url_for('admin_leads.index') }}">Enquiries</a>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Notifications {% if unread %}<span class="badge">{{ unread }}</span>{% endif %}</h2>
+    {% if unread %}
+    <form method="post" action="{{ url_for('dashboard.mark_notifications_read') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost btn-sm" type="submit">Mark all as read</button>
+    </form>
+    {% endif %}
+  </div>
+  {% if notifications %}
+  <ul class="feed">
+    {% for note in notifications %}
+    <li class="unread">
+      <span>{% if note.link %}<a href="{{ note.link }}">{{ note.message }}</a>{% else %}{{ note.message }}{% endif %}</span>
+      <time>{{ note.created_at.strftime('%d %b %Y, %H:%M') }} UTC</time>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">You are all caught up.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Recent activity</h2>
+  {% if activity %}
+  <ul class="feed">
+    {% for item in activity %}
+    <li><span>{{ item.text }}</span><time>{{ item.time.strftime('%d %b %Y, %H:%M') }} UTC</time></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">No activity yet. Visits, clicks, enquiries and your own changes will appear here.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "admin/layout.html" %}
+{% block title %}Media library{% endblock %}
+{% block heading %}Media library{% endblock %}
+{% block content %}
+<h1 class="page-title">Media library</h1>
+{% if not uploads_enabled %}<div class="flash flash-info">File uploads are turned off on this host because it has no permanent storage. Everything else works.</div>{% endif %}
+<p class="muted">Images and screenshots can be shown on project pages. PDF documents are <strong>private</strong>: only you can open them while logged in.</p>
+
+<section class="card">
+  <h2>Upload files</h2>
+  <form method="post" action="{{ url_for('admin_media.upload') }}" enctype="multipart/form-data" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Files <small>(PNG, JPG, GIF, WebP up to 5 MB each; PDF up to 10 MB; max 10 files)</small>
+      <input type="file" name="files" multiple required accept="image/png,image/jpeg,image/gif,image/webp,application/pdf">
+    </label>
+    <div class="grid-2">
+      <label>Image type
+        <select name="kind"><option value="screenshot">Screenshot</option><option value="image">Image</option></select>
+      </label>
+      <label>Folder
+        <input type="text" name="folder" list="folder-list" maxlength="80" placeholder="General">
+        <datalist id="folder-list">{% for f in folders %}<option value="{{ f }}">{% endfor %}</datalist>
+      </label>
+      <label>Attach to project <small>(optional)</small>
+        <select name="project_id"><option value="">— none —</option>
+          {% for p in projects %}<option value="{{ p.id }}">{{ p.title }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Caption <small>(optional)</small>
+        <input type="text" name="caption" maxlength="255">
+      </label>
+    </div>
+    <div class="row-actions"><button class="btn btn-primary" type="submit">Upload</button></div>
+  </form>
+</section>
+
+<div class="filters" style="margin-top:22px">
+  <a class="chip {{ 'active' if not folder and not kind }}" href="{{ url_for('admin_media.index') }}">All</a>
+  {% for k in kinds %}<a class="chip {{ 'active' if kind == k }}" href="{{ url_for('admin_media.index', kind=k) }}">{{ k|capitalize }}s</a>{% endfor %}
+  {% for f in folders %}<a class="chip {{ 'active' if folder == f }}" href="{{ url_for('admin_media.index', folder=f) }}">📁 {{ f }}</a>{% endfor %}
+</div>
+
+{% if items %}
+<div class="media-grid">
+  {% for item in items %}
+  <article class="media-card">
+    <div class="media-thumb">
+      {% if item.is_image %}
+      <img src="{{ url_for('public.media', filename=item.filename) }}" alt="{{ item.display_name }}" loading="lazy">
+      {% else %}
+      <a href="{{ url_for('admin_media.file', media_id=item.id) }}" target="_blank" rel="noopener" class="pdf-tile">📄<span>Open PDF</span></a>
+      {% endif %}
+    </div>
+    <div class="media-meta">
+      <strong title="{{ item.display_name }}">{{ item.display_name }}</strong>
+      <small class="muted">{{ item.kind|capitalize }} · {{ (item.size_bytes / 1024)|round(0)|int }} KB · 📁 {{ item.folder }}</small>
+      <small class="muted">{% if item.project %}Project: {{ item.project.title }}{% else %}Not attached to a project{% endif %}</small>
+      <span class="pill {{ 'pill-live' if item.is_public else 'pill-draft' }}">{{ 'Public image' if item.is_public else 'Private document' }}</span>
+    </div>
+    <details class="media-edit">
+      <summary class="btn btn-ghost btn-sm">Edit</summary>
+      <form method="post" action="{{ url_for('admin_media.edit', media_id=item.id) }}" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Name <input type="text" name="display_name" value="{{ item.display_name }}" maxlength="255" required></label>
+        <label>Caption <input type="text" name="caption" value="{{ item.caption or '' }}" maxlength="255"></label>
+        <label>Folder <input type="text" name="folder" value="{{ item.folder }}" maxlength="80"></label>
+        {% if item.is_image %}
+        <label>Type <select name="kind">
+          <option value="screenshot" {{ 'selected' if item.kind == 'screenshot' }}>Screenshot</option>
+          <option value="image" {{ 'selected' if item.kind == 'image' }}>Image</option></select></label>
+        {% endif %}
+        <label>Project <select name="project_id"><option value="">— none —</option>
+          {% for p in projects %}<option value="{{ p.id }}" {{ 'selected' if item.project_id == p.id }}>{{ p.title }}</option>{% endfor %}
+        </select></label>
+        <button class="btn btn-primary btn-sm" type="submit">Save</button>
+      </form>
+    </details>
+    <form method="post" action="{{ url_for('admin_media.delete', media_id=item.id) }}" data-confirm="Delete this file permanently?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+    </form>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<section class="card"><p class="muted">No files yet. Upload screenshots or documents above.</p></section>
+{% endif %}
+{% endblock %}

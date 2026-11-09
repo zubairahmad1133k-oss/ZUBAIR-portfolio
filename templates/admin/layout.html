@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block body %}
+{% set ep = request.endpoint or '' %}
+{% set unread = unread_notifications() %}
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{{ url_for('dashboard.overview') }}">ZUBAIR<span>.</span> OS</a>
+    <nav class="side-nav">
+      <a class="nav-link {{ 'active' if ep in ('dashboard.overview',) }}" href="{{ url_for('dashboard.overview') }}">Overview{% if unread %} <span class="badge">{{ unread }}</span>{% endif %}</a>
+      <a class="nav-link {{ 'active' if ep.startswith('analytics.') }}" href="{{ url_for('analytics.index') }}">Analytics</a>
+      <a class="nav-link {{ 'active' if ep.startswith('admin_projects.') or ep.startswith('admin_snippets.') }}" href="{{ url_for('admin_projects.index') }}">Projects</a>
+      {% set fresh = new_enquiries() %}
+      <a class="nav-link {{ 'active' if ep.startswith('admin_leads.') }}" href="{{ url_for('admin_leads.index') }}">Enquiries{% if fresh %} <span class="badge">{{ fresh }}</span>{% endif %}</a>
+      <a class="nav-link {{ 'active' if ep.startswith('admin_media.') }}" href="{{ url_for('admin_media.index') }}">Media</a>
+      <a class="nav-link {{ 'active' if ep.startswith('admin_goals.') }}" href="{{ url_for('admin_goals.index') }}">Goals</a>
+      <a class="nav-link {{ 'active' if ep.startswith('admin_analyst.') }}" href="{{ url_for('admin_analyst.index') }}">AI Analyst</a>
+      <a class="nav-link {{ 'active' if ep == 'dashboard.account' }}" href="{{ url_for('dashboard.account') }}">Account</a>
+      <a class="nav-link" href="{{ url_for('public.home') }}" target="_blank" rel="noopener">View site ↗</a>
+    </nav>
+    <form method="post" action="{{ url_for('auth.logout') }}" class="logout-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="nav-link logout">Log out</button>
+    </form>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="icon-btn" id="sidebarToggle" aria-label="Open menu">☰</button>
+      <span class="topbar-title">{% block heading %}Dashboard{% endblock %}</span>
+    </div>
+    <div class="content">
+      {{ flashes() }}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

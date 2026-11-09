@@ -1,0 +1,47 @@
+{% extends "admin/layout.html" %}
+{% block title %}AI Analyst{% endblock %}
+{% block heading %}AI Analyst{% endblock %}
+{% block content %}
+<h1 class="page-title">AI Analyst</h1>
+<p class="muted">Reads your real recorded statistics. <strong>Observed</strong> items are facts from your data. <strong>Possible</strong> items are guesses. <strong>Suggestions</strong> are ideas, not facts.</p>
+
+<div class="filters">
+  {% for key, label in [('today','Today'),('7d','Last 7 days'),('30d','Last 30 days'),('90d','Last 90 days')] %}
+  <a class="chip {{ 'active' if rng.key == key }}" href="{{ url_for('admin_analyst.index', range=key) }}">{{ label }}</a>
+  {% endfor %}
+</div>
+{% if rng.note %}<div class="flash flash-info">{{ rng.note }}</div>{% endif %}
+{% if analysis.note %}<div class="flash flash-info">{{ analysis.note }}</div>{% endif %}
+
+<section class="card">
+  <h2>Observed (from your data)</h2>
+  <ul class="bullets">{% for item in analysis.facts %}<li>{{ item }}</li>{% endfor %}</ul>
+</section>
+<section class="card">
+  <h2>Possible explanations (uncertain)</h2>
+  <ul class="bullets">{% for item in analysis.possible %}<li>{{ item }}</li>{% endfor %}</ul>
+</section>
+<section class="card">
+  <h2>Suggestions</h2>
+  {% if analysis.suggestions %}
+  <ul class="bullets">{% for item in analysis.suggestions %}<li>{{ item }}</li>{% endfor %}</ul>
+  {% else %}<p class="muted">Nothing specific to suggest right now.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>AI explanation (optional)</h2>
+  {% if ai_error %}<div class="flash flash-error">{{ ai_error }}</div>{% endif %}
+  {% if narrative %}<div class="ai-text">{{ narrative }}</div>{% endif %}
+  {% if ai_enabled %}
+  <form method="post" class="row-actions">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="ai" value="1">
+    <input type="hidden" name="range" value="{{ rng.key if rng.key != 'custom' else '7d' }}">
+    <button class="btn btn-primary" type="submit">Ask AI to explain these numbers</button>
+  </form>
+  <p class="small muted">Sends only the summary lines above (no visitor data) to the AI service you configured.</p>
+  {% else %}
+  <p class="muted">No AI key is configured, so you are seeing the built-in rule-based analysis, which is fully functional. To add AI explanations, set <code>ANTHROPIC_API_KEY</code> in your environment.</p>
+  {% endif %}
+</section>
+{% endblock %}

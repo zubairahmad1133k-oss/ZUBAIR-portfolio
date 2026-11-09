@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}{{ site.title }}{% endblock %}
+{% block description %}{{ site.description }}{% endblock %}
+{% block content %}
+<main>
+<section class="container hero" id="home">
+  <div class="hero-content reveal">
+    <div class="eyebrow">✦ Independent Developer · Product Builder</div>
+    <h1>Ideas into <span class="second gradient-text">Digital Reality.</span></h1>
+    <p class="hero-desc">
+      Hi, I'm Zubair Ahmad — a Software Developer & AI Product Builder.
+      I turn ideas into useful digital products through software,
+      technology and creative problem-solving.
+    </p>
+    <div class="hero-actions">
+      <a href="#work" class="btn btn-primary">Explore My Work ↗</a>
+      <a href="#contact" class="btn btn-outline">Hire Me</a>
+    </div>
+    <div class="availability"><span class="dot"></span> Open to discussing new projects and collaborations</div>
+  </div>
+
+  <div class="hero-art reveal">
+    <div class="floating-tag tag-one">✦ AI + Innovation</div>
+    <div class="art-card">
+      <div class="art-top"><span>CREATIVE MIND</span><span>01 / {{ '%02d' % ([projects|length, 1]|max) }}</span></div>
+      <div class="art-symbol">ZA.</div>
+      <div class="code-window">
+        <div><span class="pink">const</span> developer = <span class="blue">"Zubair"</span>;</div>
+        <div><span class="pink">const</span> mission = <span class="blue">"Build useful things"</span>;</div>
+        <div>developer.create(mission);</div>
+      </div>
+      <div class="art-bottom">SOFTWARE · AI · DIGITAL PRODUCTS</div>
+    </div>
+    <div class="floating-tag tag-two">Building what matters ↗</div>
+  </div>
+</section>
+
+<div class="container intro-strip">
+  <div><span>01</span> — Software Development</div>
+  <div><span>02</span> — AI-Powered Products</div>
+  <div><span>03</span> — Web Experiences</div>
+</div>
+
+<section class="container" id="work">
+  <div class="section-head reveal">
+    <div class="section-label">Selected projects / 01</div>
+    <h2 class="section-title">Things I've been <span class="gradient-text">building.</span></h2>
+    <p class="section-desc">Real projects, practical ideas and digital experiences. Here's a look at some of my work.</p>
+  </div>
+
+  <div class="projects-grid">
+    {% for p in projects %}
+    <article class="project-card reveal">
+      <div class="project-visual {{ p.visual_class }}">
+        <span class="project-number">{{ p.card_label or ('PROJECT %02d' % loop.index) }}</span>
+        {% if p.thumbnail %}
+        <img class="project-thumb" src="{{ url_for('public.media', filename=p.thumbnail) }}" alt="{{ p.title }} thumbnail" loading="lazy">
+        {% else %}
+        <div class="visual-icon">{{ p.icon }}</div>
+        {% endif %}
+      </div>
+      <div class="project-type">{{ p.category }}</div>
+      <h3>{{ p.title }}</h3>
+      <p>{{ p.summary }}</p>
+      <div class="tags">{% for tech in p.tech_list %}<span>{{ tech }}</span>{% endfor %}</div>
+      {% if p.is_placeholder %}
+      <span class="project-link">{{ p.link_text or "More soon" }}</span>
+      {% else %}
+      <a class="project-link" href="{{ url_for('public.project_detail', slug=p.slug) }}" data-project="{{ p.slug }}">{{ p.link_text or "View project ↗" }}</a>
+      {% endif %}
+    </article>
+    {% else %}
+    <p class="section-desc">Projects are being added. Please check back soon.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="about" style="background:#ffffff04;">
+  <div class="container about-grid">
+    <div class="about-art reveal">
+      <small>THE PERSON BEHIND THE PROJECTS</small>
+      <strong>Think.<br>Build.<br><span class="gradient-text">Improve.</span></strong>
+      <small>Curiosity creates ideas. Consistency turns them into products.</small>
+    </div>
+    <div class="about-copy reveal">
+      <div class="section-label">A little about me / 02</div>
+      <h2 class="section-title">Not just writing code. <span class="gradient-text">Building solutions.</span></h2>
+      <p>I'm Zubair Ahmad, a Software Developer & AI Product Builder interested in creating digital products that solve real problems.</p>
+      <p>My journey is driven by curiosity: understanding how technology works, learning new tools and turning ideas into working projects. I enjoy exploring software development, AI integration and web experiences.</p>
+      <p>I believe good products are built through learning, testing, listening and continuous improvement.</p>
+      <div class="about-highlights">
+        <div class="highlight"><b>Software Development</b><span>Building practical applications</span></div>
+        <div class="highlight"><b>AI Integration</b><span>Exploring useful AI features</span></div>
+        <div class="highlight"><b>Product Thinking</b><span>Ideas focused on real needs</span></div>
+        <div class="highlight"><b>Continuous Learning</b><span>Improving with every project</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container" id="services">
+  <div class="section-head reveal">
+    <div class="section-label">What I can help with / 03</div>
+    <h2 class="section-title">Let's build something <span class="gradient-text">valuable.</span></h2>
+    <p class="section-desc">A few areas where I can discuss your ideas and help bring a digital project to life.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service reveal">
+      <div class="service-icon">🌐</div>
+      <h3>Website Development</h3>
+      <p>Modern, responsive websites for businesses, organizations and personal brands.</p>
+    </div>
+    <div class="service reveal">
+      <div class="service-icon">🤖</div>
+      <h3>AI Integration</h3>
+      <p>Adding useful AI-powered features and intelligent workflows to digital products.</p>
+    </div>
+    <div class="service reveal">
+      <div class="service-icon">⚙️</div>
+      <h3>Web Applications</h3>
+      <p>Practical web application ideas, interfaces and backend functionality.</p>
+    </div>
+    <div class="service reveal">
+      <div class="service-icon">💡</div>
+      <h3>Product Prototyping</h3>
+      <p>Turning an early idea into a structured concept and working prototype.</p>
+    </div>
+    <div class="service reveal">
+      <div class="service-icon">🧩</div>
+      <h3>Problem Solving</h3>
+      <p>Understanding technical challenges and exploring practical solutions.</p>
+    </div>
+    <div class="service reveal">
+      <div class="service-icon">🚀</div>
+      <h3>Digital Experiences</h3>
+      <p>Creating clear, engaging and user-friendly experiences for visitors and customers.</p>
+    </div>
+  </div>
+</section>
+
+<section style="background:#ffffff04;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-label">How I work / 04</div>
+      <h2 class="section-title">From first idea to <span class="gradient-text">finished product.</span></h2>
+      <p class="section-desc">A straightforward process focused on communication and improvement.</p>
+    </div>
+    <div class="process-list">
+      <div class="process reveal"><b>01 / DISCOVER</b><h3>Understand</h3><p>Discuss the idea, goals and problem that needs solving.</p></div>
+      <div class="process reveal"><b>02 / PLAN</b><h3>Structure</h3><p>Decide the features, design direction and project approach.</p></div>
+      <div class="process reveal"><b>03 / BUILD</b><h3>Create</h3><p>Develop the solution and test the important features.</p></div>
+      <div class="process reveal"><b>04 / IMPROVE</b><h3>Refine</h3><p>Review feedback and make thoughtful improvements.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="container" id="contact">
+  <div class="contact-box reveal">
+    <div>
+      <div class="section-label">Have a project in mind? / 05</div>
+      <h2>Let's turn your <span class="gradient-text">idea into reality.</span></h2>
+      <p>Have a website idea, software project or potential collaboration? Tell me what you're thinking. Let's start a conversation.</p>
+      <div style="margin-top:25px;">
+        <a class="btn btn-primary" data-track="whatsapp" href="{{ site.whatsapp_url }}?text=Hello%20Zubair%2C%20I%20visited%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project.">Start a Conversation ↗</a>
+      </div>
+    </div>
+    <div class="contact-links">
+      <a class="contact-link" data-track="whatsapp" href="{{ site.whatsapp_url }}" target="_blank" rel="noopener">
+        <span class="symbol">💬</span>
+        <span><small>WHATSAPP</small>{{ site.whatsapp_display }}</span>
+      </a>
+      <a class="contact-link" data-track="email" href="mailto:{{ site.email }}">
+        <span class="symbol">✉️</span>
+        <span><small>EMAIL</small>{{ site.email }}</span>
+      </a>
+    </div>
+  </div>
+  <div class="enquiry-card reveal" id="enquiry">
+    <div class="section-label">Prefer to write it down?</div>
+    <h3>Send an enquiry</h3>
+    <p>Optional. Share a few details and I will reply by email. WhatsApp and email above work too.</p>
+
+    {% for message in get_flashed_messages(category_filter=["enquiry"]) %}
+    <div class="enquiry-flash ok" id="enquiry-status" role="status">{{ message }}</div>
+    {% endfor %}
+    {% if enquiry_errors %}
+    <div class="enquiry-flash bad" id="enquiry-status" role="alert">
+      <ul>{% for error in enquiry_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('public.enquiry') }}" class="enquiry-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="enquiry-grid">
+        <label>Name
+          <input type="text" name="name" required minlength="2" maxlength="120" autocomplete="name" value="{{ enquiry.name if enquiry else '' }}">
+        </label>
+        <label>Email
+          <input type="email" name="email" required maxlength="255" autocomplete="email" value="{{ enquiry.email if enquiry else '' }}">
+        </label>
+      </div>
+      <label>Project type
+        <select name="project_type" required>
+          <option value="">Choose one…</option>
+          {% for option in project_types %}
+          <option value="{{ option }}" {{ 'selected' if enquiry and enquiry.project_type == option }}>{{ option }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Message
+        <textarea name="message" rows="5" required minlength="10" maxlength="3000">{{ enquiry.message if enquiry else '' }}</textarea>
+      </label>
+      <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <button class="btn btn-primary" type="submit">Send enquiry ↗</button>
+      <p class="enquiry-note">I only use your details to reply to this enquiry.</p>
+    </form>
+  </div>
+</section>
+</main>
+{% endblock %}
+{% block scripts_extra %}<script src="{{ url_for('static', filename='js/enquiry.js') }}" defer></script>{% endblock %}

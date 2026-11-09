@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="brand brand-lg">ZUBAIR<span>.</span> OS</div>
+    <p class="muted">{% block auth_subtitle %}Private dashboard{% endblock %}</p>
+    {{ flashes() }}
+    {% block auth_form %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

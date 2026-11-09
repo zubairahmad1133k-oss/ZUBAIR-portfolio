@@ -1,0 +1,108 @@
+{% extends "admin/layout.html" %}
+{% block title %}Goals{% endblock %}
+{% block heading %}Goals{% endblock %}
+{% block content %}
+<h1 class="page-title">Goals &amp; achievements</h1>
+<section class="card welcome">
+  <h2>Keep building</h2>
+  <p class="muted">Steady, honest progress beats busy-ness. Set clear goals, update them yourself, and record what you really achieve. Nothing on this page is automatic.</p>
+</section>
+
+<section class="card">
+  <h2>New goal</h2>
+  <form method="post" action="{{ url_for('admin_goals.new_goal') }}" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Title <input type="text" name="title" maxlength="160" required></label>
+    <label>Description <small>(optional)</small><textarea name="description" rows="2" maxlength="2000"></textarea></label>
+    <label>Target date <small>(optional)</small><input type="date" name="target_date"></label>
+    <div class="row-actions"><button class="btn btn-primary" type="submit">Add goal</button></div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>In progress ({{ active|length }})</h2>
+  {% for goal in active %}
+  <div class="goal">
+    <div class="goal-head">
+      <strong>{{ goal.title }}</strong>
+      {% if goal.target_date %}<small class="muted">Target: {{ goal.target_date.strftime('%d %b %Y') }}</small>{% endif %}
+    </div>
+    {% if goal.description %}<p class="muted small">{{ goal.description }}</p>{% endif %}
+    <div class="progress" role="progressbar" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="100"><div style="width: {{ goal.progress }}%"></div></div>
+    <div class="row-actions">
+      <form method="post" action="{{ url_for('admin_goals.progress', goal_id=goal.id) }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="number" name="progress" min="0" max="100" value="{{ goal.progress }}" aria-label="Completion percentage">
+        <span class="muted">%</span>
+        <button class="btn btn-ghost btn-sm" type="submit">Update</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_goals.complete', goal_id=goal.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">Mark completed</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_goals.delete_goal', goal_id=goal.id) }}" data-confirm="Delete this goal?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <p class="muted">No active goals. Add one above.</p>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Completed ({{ done|length }})</h2>
+  {% for goal in done %}
+  <div class="goal">
+    <div class="goal-head"><strong>✓ {{ goal.title }}</strong>
+      <small class="muted">{% if goal.completed_at %}Completed {{ goal.completed_at.strftime('%d %b %Y') }}{% endif %}</small></div>
+    <div class="row-actions">
+      <form method="post" action="{{ url_for('admin_goals.reopen', goal_id=goal.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">Reopen</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_goals.delete_goal', goal_id=goal.id) }}" data-confirm="Delete this goal?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <p class="muted">Nothing completed yet.</p>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Achievements</h2>
+  <form method="post" action="{{ url_for('admin_goals.new_achievement') }}" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>What did you achieve? <input type="text" name="title" maxlength="160" required></label>
+    <label>Details <small>(optional)</small><textarea name="description" rows="2" maxlength="2000"></textarea></label>
+    <div class="grid-2">
+      <label>Date <input type="date" name="achieved_on"></label>
+      <label>Related goal <small>(optional)</small>
+        <select name="goal_id"><option value="">— none —</option>
+          {% for g in all_goals %}<option value="{{ g.id }}">{{ g.title }}</option>{% endfor %}
+        </select></label>
+    </div>
+    <div class="row-actions"><button class="btn btn-primary" type="submit">Add achievement</button></div>
+  </form>
+  <ul class="feed">
+    {% for a in achievements %}
+    <li>
+      <span><strong>{{ a.title }}</strong>{% if a.description %}<br><small class="muted">{{ a.description }}</small>{% endif %}</span>
+      <span>
+        <time>{% if a.achieved_on %}{{ a.achieved_on.strftime('%d %b %Y') }}{% endif %}</time>
+        <form method="post" action="{{ url_for('admin_goals.delete_achievement', achievement_id=a.id) }}" data-confirm="Remove this achievement?" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+        </form>
+      </span>
+    </li>
+    {% else %}
+    <li><span class="muted">No achievements recorded yet.</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

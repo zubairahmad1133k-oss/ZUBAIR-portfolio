@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} | Zubair Ahmad{% endblock %}
+{% block description %}{{ project.summary|truncate(158, True, '…') }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block content %}
+<main>
+<section class="container detail" id="home">
+  {% if preview %}
+  <div class="preview-banner">Admin preview — {{ 'this project is published.' if project.is_published else 'this project is a draft and is NOT visible to visitors.' }}</div>
+  {% endif %}
+  <a class="back-link" href="{{ url_for('public.home') }}#work">← All projects</a>
+
+  <div class="detail-grid">
+    <div class="detail-copy">
+      <div class="project-type">{{ project.category }}</div>
+      <h1 class="detail-title">{{ project.title }}</h1>
+      {% for paragraph in project.description_paragraphs %}
+      <p class="detail-text">{{ paragraph }}</p>
+      {% endfor %}
+
+      <div class="tags">{% for tech in project.tech_list %}<span>{{ tech }}</span>{% endfor %}</div>
+
+      {% if project.demo_url %}
+      <div class="site-link">
+        <small>LIVE WEBSITE</small>
+        <a class="btn btn-primary" href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer">Visit {{ project.demo_host }} ↗</a>
+        <span class="site-link-note">Opens the original website in a new tab.</span>
+      </div>
+      {% endif %}
+      {% if project.github_url or project.docs_url %}
+      <div class="detail-actions">
+        {% if project.github_url %}<a class="btn btn-outline" href="{{ project.github_url }}" target="_blank" rel="noopener noreferrer">GitHub</a>{% endif %}
+        {% if project.docs_url %}<a class="btn btn-outline" href="{{ project.docs_url }}" target="_blank" rel="noopener noreferrer">Documentation</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="project-visual {{ project.visual_class }} detail-visual">
+      {% if project.thumbnail %}
+      <img class="project-thumb" src="{{ url_for('public.media', filename=project.thumbnail) }}" alt="{{ project.title }} thumbnail">
+      {% else %}
+      <div class="visual-icon">{{ project.icon }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if project.gallery %}
+  <h2 class="detail-subhead">Screenshots</h2>
+  <div class="gallery">
+    {% for item in project.gallery %}
+    <figure>
+      <img src="{{ url_for('public.media', filename=item.filename) }}" alt="{{ item.caption or project.title ~ ' screenshot' }}" loading="lazy">
+      {% if item.caption %}<figcaption>{{ item.caption }}</figcaption>{% endif %}
+    </figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if project.snippets %}
+  <h2 class="detail-subhead">Code highlights</h2>
+  <p class="detail-text">Selected excerpts that show how this project is built. The complete source code is private.</p>
+  <div class="snippets">
+    {% for snippet in project.snippets %}
+    <figure class="snippet">
+      <figcaption>
+        <strong>{{ snippet.title }}</strong>
+        <span class="lang">{{ snippet.language_label }}</span>
+      </figcaption>
+      {% if snippet.description %}<p class="snippet-desc">{{ snippet.description }}</p>{% endif %}
+      <pre tabindex="0"><code>{{ snippet.code }}</code></pre>
+    </figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="detail-cta">
+    <div>
+      <h2 class="detail-subhead">Want something similar?</h2>
+      <p class="section-desc">Tell me about your idea, or ask for a private walkthrough of this project. Full source code is shared only by agreement.</p>
+    </div>
+    <a class="btn btn-primary" data-track="whatsapp" href="{{ site.whatsapp_url }}?text=Hello%20Zubair%2C%20I%20saw%20{{ project.title|urlencode }}%20on%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project.">Start a Conversation ↗</a>
+  </div>
+</section>
+</main>
+{% endblock %}

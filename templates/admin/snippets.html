@@ -1,0 +1,57 @@
+{% extends "admin/layout.html" %}
+{% block title %}Code highlights{% endblock %}
+{% block heading %}Code highlights{% endblock %}
+{% block content %}
+<a class="muted small" href="{{ url_for('admin_projects.index') }}">← All projects</a>
+<h1 class="page-title">Code highlights: {{ project.title }}</h1>
+<div class="flash flash-info">
+  Visitors see <strong>only the excerpts you paste here</strong>, shown as read-only text on this project's public page.
+  Nothing links to your real files, repository or downloads, so the full project stays private.
+  Paste only parts you are happy to show publicly, and never passwords, keys or private data.
+</div>
+
+{% if snippets %}
+<div class="plist">
+  {% for item in snippets %}
+  <article class="prow">
+    <div class="prow-main">
+      <strong>{{ item.title }}</strong>
+      <span class="pill pill-note">{{ item.language_label }}</span>
+      <small class="muted">{{ item.code.count('\n') + 1 }} lines{% if item.description %} · {{ item.description }}{% endif %}</small>
+    </div>
+    <div class="prow-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_snippets.edit', project_id=project.id, snippet_id=item.id) }}">Edit</a>
+      <form method="post" action="{{ url_for('admin_snippets.delete', project_id=project.id, snippet_id=item.id) }}" data-confirm="Remove this excerpt?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+      </form>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" class="card stack"
+      action="{{ url_for('admin_snippets.edit', project_id=project.id, snippet_id=editing.id) if editing else url_for('admin_snippets.index', project_id=project.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>{{ 'Edit excerpt' if editing else 'Add a code excerpt' }}</h2>
+  <label>Title * <input type="text" name="title" value="{{ values.title }}" maxlength="120" required placeholder="e.g. How errors are explained"></label>
+  <div class="grid-2">
+    <label>Language
+      <select name="language">
+        {% for key, label in languages.items() %}<option value="{{ key }}" {{ 'selected' if values.language == key }}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Short explanation <small>(optional)</small>
+      <input type="text" name="description" value="{{ values.description }}" maxlength="300">
+    </label>
+  </div>
+  <label>Code * <small>(up to 300 lines)</small>
+    <textarea name="code" rows="12" class="mono" wrap="off" spellcheck="false" required>{{ values.code }}</textarea>
+  </label>
+  <div class="row-actions">
+    <button class="btn btn-primary" type="submit">{{ 'Save excerpt' if editing else 'Add excerpt' }}</button>
+    {% if editing %}<a class="btn btn-ghost" href="{{ url_for('admin_snippets.index', project_id=project.id) }}">Cancel</a>{% endif %}
+  </div>
+</form>
+{% endblock %}

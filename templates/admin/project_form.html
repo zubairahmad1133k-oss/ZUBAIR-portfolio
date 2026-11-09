@@ -1,0 +1,70 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ 'Edit project' if project else 'Add project' }}{% endblock %}
+{% block heading %}{{ 'Edit project' if project else 'Add project' }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ 'Edit ' ~ project.title if project else 'Add a project' }}</h1>
+
+<form method="post" enctype="multipart/form-data" class="card stack">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <label>Title *
+    <input type="text" name="title" value="{{ values.title }}" maxlength="120" required>
+  </label>
+  <label>Category
+    <input type="text" name="category" value="{{ values.category }}" maxlength="160" placeholder="e.g. AI · Education · Development">
+  </label>
+  <label>Short description * <small>(shown on the project card)</small>
+    <textarea name="summary" rows="3" maxlength="600" required>{{ values.summary }}</textarea>
+  </label>
+  <label>Full description <small>(shown on the project page; blank line = new paragraph; blank = use the short one)</small>
+    <textarea name="description" rows="8" maxlength="6000">{{ values.description }}</textarea>
+  </label>
+  <label>Technologies <small>(comma separated)</small>
+    <input type="text" name="technologies" value="{{ values.technologies }}" maxlength="300" placeholder="Python, Flask, JavaScript">
+  </label>
+
+  <div class="grid-2">
+    <label>Card colour style
+      <select name="visual_class">
+        {% for key, label in visual_styles.items() %}
+        <option value="{{ key }}" {{ 'selected' if values.visual_class == key }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Card icon <small>(one emoji or symbol)</small>
+      <input type="text" name="icon" value="{{ values.icon }}" maxlength="16">
+    </label>
+    <label>Card label <small>(blank = "PROJECT 01")</small>
+      <input type="text" name="card_label" value="{{ values.card_label }}" maxlength="40">
+    </label>
+    <label>Card link text
+      <input type="text" name="link_text" value="{{ values.link_text }}" maxlength="120">
+    </label>
+  </div>
+
+  <div class="grid-2">
+    <label>Live website URL <small>(visitors click “Visit website” to open it)</small><input type="url" name="demo_url" value="{{ values.demo_url }}" placeholder="https://your-project-site.com"></label>
+    <label>GitHub URL <input type="url" name="github_url" value="{{ values.github_url }}" placeholder="https://"></label>
+    <label>Documentation URL <input type="url" name="docs_url" value="{{ values.docs_url }}" placeholder="https://"></label>
+  </div>
+
+  {% if not uploads_enabled %}<div class="flash flash-info">Thumbnail uploads are turned off on this host (no permanent storage).</div>{% endif %}
+  <label>Thumbnail image <small>(PNG, JPG, GIF or WebP, max 5 MB)</small>
+    <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/gif,image/webp">
+  </label>
+  {% if project and project.thumbnail %}
+  <div class="thumb-current">
+    <img src="{{ url_for('public.media', filename=project.thumbnail) }}" alt="Current thumbnail">
+    <label class="check"><input type="checkbox" name="remove_thumbnail"> Remove current thumbnail</label>
+  </div>
+  {% endif %}
+
+  <label class="check"><input type="checkbox" name="is_published" {{ 'checked' if values.is_published }}> Publish on my portfolio</label>
+  <label class="check"><input type="checkbox" name="is_placeholder" {{ 'checked' if values.is_placeholder }}> Placeholder card (no project page, like “What’s Next?”)</label>
+
+  <div class="row-actions">
+    <button class="btn btn-primary" type="submit">Save project</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin_projects.index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

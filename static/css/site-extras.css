@@ -1,0 +1,95 @@
+/* Additions for the dynamic pages. The original design lives in portfolio.css. */
+
+/* Real thumbnails (when uploaded) fill the card visual. */
+.project-thumb { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+
+/* Whole project card is clickable through its link. */
+.project-card .project-link::after { content:""; position:absolute; inset:0; }
+
+/* Keyboard focus */
+a:focus-visible, button:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+
+/* Project detail page */
+.detail { padding-top:55px; padding-bottom:90px; }
+.back-link { color:var(--muted); font-size:13px; display:inline-block; margin-bottom:35px; transition:.2s; }
+.back-link:hover { color:white; }
+.detail-grid { display:grid; grid-template-columns:1.1fr .9fr; gap:50px; align-items:start; }
+.detail-title {
+  font-family:'Space Grotesk'; font-size:clamp(38px,6vw,64px);
+  letter-spacing:-3px; line-height:1.08; margin-bottom:22px;
+}
+.detail-text { color:var(--muted); line-height:1.9; font-size:15px; margin-bottom:16px; max-width:560px; }
+.detail-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; }
+.detail-visual { height:340px; margin-bottom:0; border:1px solid var(--line); }
+.detail-subhead { font-family:'Space Grotesk'; font-size:24px; letter-spacing:-1px; margin-bottom:10px; }
+.gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; margin:20px 0 10px; }
+.gallery figure { background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.gallery img { display:block; width:100%; height:auto; }
+.gallery figcaption { padding:10px 14px; font-size:12px; color:var(--muted); }
+.detail-cta {
+  margin-top:70px; padding:32px; border:1px solid var(--line); border-radius:20px;
+  background:linear-gradient(135deg,#1c1a2b,#141a28);
+  display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
+}
+
+/* Error pages */
+.error-page { padding-top:110px; padding-bottom:110px; min-height:60vh; }
+
+@media(max-width:800px) {
+  .detail-grid { grid-template-columns:1fr; gap:30px; }
+  .detail-visual { height:240px; order:-1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  .art-card { animation:none; }
+  .reveal { transition:none; }
+}
+
+.preview-banner { background:rgba(255,152,82,.12); border:1px solid rgba(255,152,82,.4); color:var(--orange);
+  border-radius:12px; padding:10px 16px; font-size:13px; font-weight:600; margin-bottom:24px; }
+
+/* Small Admin button in the top menu */
+.nav-links .admin-btn {
+  border:1px solid var(--line); border-radius:999px; padding:5px 13px;
+  font-size:12px; font-weight:600; color:var(--muted);
+}
+.nav-links .admin-btn:hover { color:white; border-color:var(--pink); }
+
+/* Code highlights on project pages (read-only excerpts) */
+.snippets { display:flex; flex-direction:column; gap:18px; margin:18px 0 10px; }
+.snippet { background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.snippet figcaption { display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:12px 16px; border-bottom:1px solid var(--line); font-size:14px; }
+.snippet .lang { color:var(--blue); font-size:11px; letter-spacing:1px; text-transform:uppercase; font-weight:700; }
+.snippet-desc { color:var(--muted); font-size:13px; padding:12px 16px 0; line-height:1.7; }
+.snippet pre { margin:0; padding:16px; overflow-x:auto; font-size:13px; line-height:1.6;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace; color:#e8e6f5; tab-size:4; }
+.snippet pre:focus-visible { outline:2px solid var(--blue); outline-offset:-2px; }
+
+/* Enquiry form (sits under the original contact box) */
+.enquiry-card { margin-top:22px; padding:34px; border:1px solid var(--line); border-radius:24px;
+  background:linear-gradient(135deg,#1c1a2b,#141a28); }
+.enquiry-card h3 { font-family:'Space Grotesk'; font-size:28px; letter-spacing:-1px; margin:6px 0 8px; }
+.enquiry-card > p { color:var(--muted); font-size:14px; line-height:1.8; margin-bottom:20px; max-width:560px; }
+.enquiry-form { display:flex; flex-direction:column; gap:16px; max-width:640px; }
+.enquiry-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.enquiry-form label { display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--muted); font-weight:600; }
+.enquiry-form input, .enquiry-form select, .enquiry-form textarea {
+  width:100%; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:12px;
+  padding:12px 14px; color:var(--text); font:inherit; font-size:14px; }
+.enquiry-form select option { background:#14141f; }
+.enquiry-form input:focus, .enquiry-form select:focus, .enquiry-form textarea:focus { border-color:var(--blue); outline:none; }
+.enquiry-form button { align-self:flex-start; cursor:pointer; border:0; }
+.enquiry-note { font-size:12px; color:var(--muted); }
+.hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+.enquiry-flash { border-radius:12px; padding:12px 16px; margin-bottom:18px; font-size:14px; max-width:640px; }
+.enquiry-flash.ok { background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.4); color:#a7f3c0; }
+.enquiry-flash.bad { background:rgba(255,107,107,.1); border:1px solid rgba(255,107,107,.4); color:#ffb3b3; }
+.enquiry-flash ul { margin-left:18px; }
+@media(max-width:600px) { .enquiry-grid { grid-template-columns:1fr; } .enquiry-card { padding:24px; } }
+
+/* "Visit website" block on project pages */
+.site-link { margin-top:28px; padding:18px 20px; border:1px solid var(--line); border-radius:16px;
+  background:linear-gradient(135deg,#1c1a2b,#141a28); display:flex; flex-direction:column; align-items:flex-start; gap:10px; max-width:560px; }
+.site-link small { color:var(--muted); font-size:11px; letter-spacing:1.4px; font-weight:700; }
+.site-link-note { color:var(--muted); font-size:12px; }

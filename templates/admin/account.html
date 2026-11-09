@@ -1,0 +1,28 @@
+{% extends "admin/layout.html" %}
+{% block title %}Account{% endblock %}
+{% block heading %}Account{% endblock %}
+{% block content %}
+<h1 class="page-title">Account settings</h1>
+
+<section class="card">
+  <h2>Profile</h2>
+  <form method="post" action="{{ url_for('dashboard.update_profile') }}" class="stack narrow">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Username <input type="text" value="{{ current_user.username }}" disabled></label>
+    <label>Email <input type="email" name="email" value="{{ current_user.email }}" required></label>
+    <button class="btn btn-primary" type="submit">Save profile</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Change password</h2>
+  <form method="post" action="{{ url_for('dashboard.change_password') }}" class="stack narrow">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Current password <input type="password" name="current_password" required autocomplete="current-password"></label>
+    <label>New password <input type="password" name="new_password" required minlength="12" autocomplete="new-password">
+      <small>12+ characters, upper and lower case, at least one number.</small></label>
+    <label>Confirm new password <input type="password" name="confirm_password" required autocomplete="new-password"></label>
+    <button class="btn btn-primary" type="submit">Change password</button>
+  </form>
+</section>
+{% endblock %}

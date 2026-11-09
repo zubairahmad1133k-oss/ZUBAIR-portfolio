@@ -1,0 +1,56 @@
+{% extends "admin/layout.html" %}
+{% block title %}Projects{% endblock %}
+{% block heading %}Projects{% endblock %}
+{% block content %}
+<div class="card-head">
+  <h1 class="page-title">Projects</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin_projects.new') }}">+ Add project</a>
+</div>
+<p class="muted">Published projects appear on your portfolio in this order. Drafts stay private.</p>
+
+{% if projects %}
+<div class="plist">
+  {% for p in projects %}
+  <article class="prow">
+    <div class="prow-order">
+      <form method="post" action="{{ url_for('admin_projects.move', project_id=p.id, direction='up') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="icon-btn" type="submit" aria-label="Move up" {{ 'disabled' if loop.first }}>↑</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_projects.move', project_id=p.id, direction='down') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="icon-btn" type="submit" aria-label="Move down" {{ 'disabled' if loop.last }}>↓</button>
+      </form>
+    </div>
+    <div class="prow-main">
+      <strong>{{ p.title }}</strong>
+      <small class="muted">{{ p.category }}</small>
+      <span class="pill {{ 'pill-live' if p.is_published else 'pill-draft' }}">{{ 'Published' if p.is_published else 'Draft' }}</span>
+      {% if p.is_placeholder %}<span class="pill pill-note">Placeholder</span>{% endif %}
+    </div>
+    <div class="prow-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_projects.edit', project_id=p.id) }}">Edit</a>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_snippets.index', project_id=p.id) }}">Code ({{ p.snippets|length }})</a>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_projects.preview', project_id=p.id) }}" target="_blank" rel="noopener">Preview</a>
+      <form method="post" action="{{ url_for('admin_projects.toggle_publish', project_id=p.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ 'Unpublish' if p.is_published else 'Publish' }}</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_projects.delete', project_id=p.id) }}" data-confirm="Delete '{{ p.title }}' permanently? This cannot be undone.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+      </form>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<section class="card">
+  <p class="muted">No projects yet. Add your first one, or start with your four portfolio projects.</p>
+  <form method="post" action="{{ url_for('admin_projects.seed') }}" class="row-actions">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-primary" type="submit">Add the 4 starter projects</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

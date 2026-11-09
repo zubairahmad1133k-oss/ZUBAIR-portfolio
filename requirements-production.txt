@@ -1,0 +1,3 @@
+# Extra packages only needed when deploying with PostgreSQL (Render / Supabase).
+-r requirements.txt
+psycopg2-binary>=2.9,<3

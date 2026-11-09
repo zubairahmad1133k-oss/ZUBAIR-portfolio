@@ -1,0 +1,94 @@
+{% extends "admin/layout.html" %}
+{% block title %}Analytics{% endblock %}
+{% block heading %}Analytics{% endblock %}
+{% block content %}
+<h1 class="page-title">Analytics</h1>
+<p class="muted">Every number comes from real recorded visits and clicks. Times are UTC. Visitors who send Do&#8209;Not&#8209;Track, bots and your own logged&#8209;in visits are not counted.</p>
+
+<div class="filters">
+  {% for key, label in [('today','Today'),('7d','Last 7 days'),('30d','Last 30 days'),('90d','Last 90 days')] %}
+  <a class="chip {{ 'active' if rng.key == key }}" href="{{ url_for('analytics.index', range=key) }}">{{ label }}</a>
+  {% endfor %}
+  <form method="get" class="custom-range">
+    <input type="hidden" name="range" value="custom">
+    <input type="date" name="from" value="{{ rng.first.isoformat() if rng.key == 'custom' }}" required aria-label="From date">
+    <span class="muted">to</span>
+    <input type="date" name="to" value="{{ rng.last.isoformat() if rng.key == 'custom' }}" required aria-label="To date">
+    <button class="btn btn-ghost btn-sm" type="submit">Apply</button>
+  </form>
+</div>
+{% if rng.note %}<div class="flash flash-info">{{ rng.note }}</div>{% endif %}
+<p class="small muted">Showing: <strong>{{ rng.label }}</strong> ({{ rng.days }} day{{ 's' if rng.days != 1 }})</p>
+
+<div class="stats">
+  <div class="stat"><small>UNIQUE VISITORS</small><strong>{{ report.uniques }}</strong><em class="trend {{ report.uniques_trend.direction }}">{{ report.uniques_trend.text }}</em></div>
+  <div class="stat"><small>PAGE VIEWS</small><strong>{{ report.views }}</strong><em class="trend {{ report.views_trend.direction }}">{{ report.views_trend.text }}</em></div>
+  <div class="stat"><small>PROJECT VIEWS</small><strong>{{ report.project_views }}</strong></div>
+</div>
+
+<div class="stats">
+  <div class="stat"><small>CONTACT BUTTON CLICKS</small><strong>{{ report.clicks.total }}</strong>
+    <em class="trend flat">WhatsApp {{ report.clicks.whatsapp }} · Email {{ report.clicks.email }}</em></div>
+  <div class="stat"><small>CONFIRMED ENQUIRIES</small><strong>{{ report.enquiries }}</strong>
+    <em class="trend flat">Submitted through the form</em></div>
+</div>
+<p class="small muted">A button click only means someone tapped WhatsApp or email. It is <strong>not</strong> counted as an enquiry. Only the enquiry form creates a confirmed enquiry.</p>
+
+<section class="card">
+  <div class="card-head"><h2>Traffic over time</h2><div id="chart-legend" class="legend"></div></div>
+  {% if not report.has_data %}<p class="muted">No visits recorded in this period yet. Charts fill in as real visitors arrive.</p>{% endif %}
+  <div id="chart-traffic" class="chart"></div>
+</section>
+
+<section class="card">
+  <h2>Visitors (unique)</h2>
+  <div class="stats mini">
+    <div class="stat"><small>ALL TIME</small><strong>{{ report.total_visitors }}</strong></div>
+    <div class="stat"><small>TODAY</small><strong>{{ report.today_visitors }}</strong></div>
+    <div class="stat"><small>LAST 7 DAYS</small><strong>{{ report.week_visitors }}</strong></div>
+    <div class="stat"><small>LAST 30 DAYS</small><strong>{{ report.month_visitors }}</strong></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Project engagement</h2>
+  {% if report.engagement %}
+  {% set top = report.engagement[0].views if report.engagement[0].views else 1 %}
+  <div class="bars">
+    {% for row in report.engagement %}
+    <div class="bar-row">
+      <div class="bar-label">{{ row.title }}</div>
+      <div class="bar-track" title="{{ row.views }} views, {{ row.viewers }} unique viewers"><div class="bar-fill" style="width: {{ (row.views / top * 100)|round(0) }}%"></div></div>
+      <div class="bar-num">{{ row.views }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Project</th><th>Views</th><th>Unique viewers</th><th>Contact clicks from its page</th></tr></thead>
+      <tbody>
+        {% for row in report.engagement %}
+        <tr><td>{{ row.title }}</td><td>{{ row.views }}</td><td>{{ row.viewers }}</td><td>{{ row.clicks }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted">No published projects yet.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Recent activity</h2>
+  {% if report.activity %}
+  <ul class="feed">
+    {% for item in report.activity %}
+    <li><span>{{ item.text }}</span><time>{{ item.time.strftime('%d %b %Y, %H:%M') }} UTC</time></li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="muted">Nothing recorded yet.</p>{% endif %}
+</section>
+
+<script type="application/json" id="analytics-data">{{ chart|tojson }}</script>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/charts.js') }}"></script>{% endblock %}

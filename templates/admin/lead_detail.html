@@ -1,0 +1,36 @@
+{% extends "admin/layout.html" %}
+{% block title %}Enquiry from {{ lead.name }}{% endblock %}
+{% block heading %}Enquiry{% endblock %}
+{% block content %}
+<a class="muted small" href="{{ url_for('admin_leads.index') }}">← All enquiries</a>
+<h1 class="page-title">{{ lead.name }}</h1>
+
+<section class="card">
+  <dl class="meta">
+    <div><dt>Email</dt><dd><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></dd></div>
+    <div><dt>Project type</dt><dd>{{ lead.project_type }}</dd></div>
+    <div><dt>Received</dt><dd>{{ lead.created_at.strftime('%d %b %Y, %H:%M') }} UTC</dd></div>
+  </dl>
+  <h2>Message</h2>
+  <p class="message-body">{{ lead.message }}</p>
+</section>
+
+<form method="post" action="{{ url_for('admin_leads.update', lead_id=lead.id) }}" class="card stack">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>Status and private notes</h2>
+  <label>Status
+    <select name="status">
+      {% for key, label in statuses.items() %}<option value="{{ key }}" {{ 'selected' if lead.status == key }}>{{ label }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Private notes <small>(only you can see these)</small>
+    <textarea name="private_notes" rows="5" maxlength="5000">{{ lead.private_notes }}</textarea>
+  </label>
+  <div class="row-actions"><button class="btn btn-primary" type="submit">Save</button></div>
+</form>
+
+<form method="post" action="{{ url_for('admin_leads.delete', lead_id=lead.id) }}" data-confirm="Delete this enquiry permanently?" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-danger" type="submit">Delete enquiry</button>
+</form>
+{% endblock %}

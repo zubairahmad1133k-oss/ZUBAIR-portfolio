@@ -1,0 +1,20 @@
+{% extends "admin/auth.html" %}
+{% block title %}First-time setup{% endblock %}
+{% block auth_subtitle %}Create your admin account (one time only){% endblock %}
+{% block auth_form %}
+<form method="post" class="stack">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Setup token
+    <input type="password" name="setup_token" required autocomplete="off">
+    <small>The ADMIN_SETUP_TOKEN value you set on the server.</small>
+  </label>
+  <label>Username <input type="text" name="username" required minlength="3" autocomplete="username"></label>
+  <label>Email <input type="email" name="email" required autocomplete="email"></label>
+  <label>Password
+    <input type="password" name="password" required minlength="12" autocomplete="new-password">
+    <small>12+ characters, upper and lower case, at least one number.</small>
+  </label>
+  <label>Confirm password <input type="password" name="confirm" required autocomplete="new-password"></label>
+  <button class="btn btn-primary" type="submit">Create admin</button>
+</form>
+{% endblock %}
