@@ -1,0 +1,21 @@
+{% extends "admin/auth.html" %}
+{% block title %}Reset password{% endblock %}
+{% block auth_subtitle %}Set a new admin password{% endblock %}
+{% block auth_form %}
+<form method="post" class="stack">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Setup token
+    <input type="password" name="setup_token" required autocomplete="off">
+    <small>The ADMIN_SETUP_TOKEN value from your hosting settings.</small>
+  </label>
+  <label>Admin username <input type="text" name="username" required autocomplete="username">
+    <small>Not sure? Type anything: after a correct token, the real username is shown.</small></label>
+  <label>New password
+    <input type="password" name="password" required minlength="12" autocomplete="new-password">
+    <small>12+ characters, upper and lower case, at least one number.</small>
+  </label>
+  <label>Confirm new password <input type="password" name="confirm" required autocomplete="new-password"></label>
+  <button class="btn btn-primary" type="submit">Set new password</button>
+</form>
+<p class="muted small center"><a href="{{ url_for('auth.login') }}">← Back to login</a></p>
+{% endblock %}

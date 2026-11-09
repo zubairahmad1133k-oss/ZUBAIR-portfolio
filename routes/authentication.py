@@ -48,8 +48,12 @@ def login():
             return redirect(target if is_safe_next(target) else url_for("dashboard.overview"))
         flash("Incorrect username or password.", "error")  # same message for both cases
 
-    setup_available = bool(current_app.config["ADMIN_SETUP_TOKEN"]) and _no_admin_yet()
-    return render_template("admin/login.html", setup_available=setup_available)
+    has_token = bool(current_app.config["ADMIN_SETUP_TOKEN"])
+    no_admin = _no_admin_yet()
+    return render_template(
+        "admin/login.html", setup_available=has_token and no_admin,
+        reset_available=has_token and not no_admin,
+    )
 
 
 @bp.post("/logout")
@@ -66,8 +70,11 @@ def setup():
     """Create the first admin from the browser. Needs ADMIN_SETUP_TOKEN and
     only works while no admin exists."""
     token = current_app.config["ADMIN_SETUP_TOKEN"]
-    if not token or not _no_admin_yet():
+    if not token:
         abort(404)
+    if not _no_admin_yet():
+        flash("An admin account already exists. Log in, or use “Forgot username or password?”.", "info")
+        return redirect(url_for("auth.login"))
 
     if request.method == "POST":
         supplied = request.form.get("setup_token", "")
@@ -100,3 +107,41 @@ def setup():
             flash(message, "error")
 
     return render_template("admin/setup.html")
+
+
+@bp.route("/reset-password", methods=["GET", "POST"])
+@limiter.limit("10 per hour", methods=["POST"])
+def reset_password():
+    """Set a new admin password from the browser, proved with ADMIN_SETUP_TOKEN.
+    For hosts without a terminal. Remove the token afterwards to switch this off."""
+    token = current_app.config["ADMIN_SETUP_TOKEN"]
+    if not token:
+        abort(404)
+
+    if request.method == "POST":
+        supplied = request.form.get("setup_token", "")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm", "")
+
+        errors = []
+        if not hmac.compare_digest(supplied.encode(), token.encode()):
+            errors.append("The setup token is not correct.")
+        else:
+            user = db.session.scalar(db.select(AdminUser).where(AdminUser.username == username))
+            if user is None:
+                names = ", ".join(db.session.scalars(db.select(AdminUser.username)).all())
+                errors.append(f"No admin has that username. The admin username(s) on this site: {names or 'none yet'}.")
+            elif password != confirm:
+                errors.append("The two passwords do not match.")
+            elif (problem := password_problem(password)) is not None:
+                errors.append(problem)
+            else:
+                user.set_password(password)  # also signs out every old session
+                db.session.commit()
+                flash("Password changed. Please log in.", "success")
+                return redirect(url_for("auth.login"))
+        for message in errors:
+            flash(message, "error")
+
+    return render_template("admin/reset.html")

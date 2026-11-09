@@ -12,6 +12,9 @@
   </label>
   <button class="btn btn-primary" type="submit">Log in</button>
 </form>
+{% if reset_available %}
+<p class="muted small center"><a href="{{ url_for('auth.reset_password') }}">Forgot username or password?</a></p>
+{% endif %}
 {% if setup_available %}
 <p class="muted small center"><a href="{{ url_for('auth.setup') }}">First time? Create your admin account</a></p>
 {% endif %}
