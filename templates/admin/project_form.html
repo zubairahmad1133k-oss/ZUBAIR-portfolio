@@ -52,9 +52,12 @@
   <label>Thumbnail image <small>(PNG, JPG, GIF or WebP, max 5 MB)</small>
     <input type="file" name="thumbnail" accept="image/png,image/jpeg,image/gif,image/webp">
   </label>
+  <label>…or paste a link to an image <small>(works on any host, including Vercel; the image must already be online, starting with https://)</small>
+    <input type="url" name="thumbnail_url" value="{{ values.thumbnail_url }}" maxlength="255" placeholder="https://example.com/my-image.png">
+  </label>
   {% if project and project.thumbnail %}
   <div class="thumb-current">
-    <img src="{{ url_for('public.media', filename=project.thumbnail) }}" alt="Current thumbnail">
+    <img src="{{ project.thumbnail if project.thumbnail_is_external else url_for('public.media', filename=project.thumbnail) }}" alt="Current thumbnail">
     <label class="check"><input type="checkbox" name="remove_thumbnail"> Remove current thumbnail</label>
   </div>
   {% endif %}

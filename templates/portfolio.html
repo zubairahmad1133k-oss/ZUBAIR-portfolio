@@ -54,7 +54,7 @@
       <div class="project-visual {{ p.visual_class }}">
         <span class="project-number">{{ p.card_label or ('PROJECT %02d' % loop.index) }}</span>
         {% if p.thumbnail %}
-        <img class="project-thumb" src="{{ url_for('public.media', filename=p.thumbnail) }}" alt="{{ p.title }} thumbnail" loading="lazy">
+        <img class="project-thumb" src="{{ p.thumbnail if p.thumbnail_is_external else url_for('public.media', filename=p.thumbnail) }}" alt="{{ p.title }} thumbnail" loading="lazy">
         {% else %}
         <div class="visual-icon">{{ p.icon }}</div>
         {% endif %}

@@ -56,6 +56,11 @@ class Project(db.Model):
         return db.select(cls).where(cls.is_published.is_(True)).order_by(cls.sort_order, cls.id)
 
     @property
+    def thumbnail_is_external(self) -> bool:
+        """True when the thumbnail is a link to an image hosted elsewhere."""
+        return bool(self.thumbnail) and self.thumbnail.startswith(("http://", "https://"))
+
+    @property
     def demo_host(self) -> str:
         """'https://www.example.com/app' -> 'example.com' (for the Visit button)."""
         host = urlparse(self.demo_url or "").netloc.lower()

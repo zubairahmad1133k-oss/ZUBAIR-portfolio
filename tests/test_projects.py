@@ -132,3 +132,22 @@ def test_one_click_starter_projects(app, admin_client):
     assert count(app, Project) == 4
     assert b"Code Checker" in admin_client.get("/").data
     assert app.test_client().post("/admin/projects/seed").status_code == 302   # needs login
+
+
+def test_thumbnail_can_be_a_link_to_an_online_image(app, admin_client):
+    link = "https://images.example.com/shot.png"
+    admin_client.post("/admin/projects/new", data=form(title="Linked Image", is_published="on", thumbnail_url=link))
+    pid = project_id(app, "linked-image")
+    assert get_project(app, pid)["thumbnail"] == link
+    assert f'src="{link}"' in admin_client.get("/").get_data(as_text=True)
+    assert f'src="{link}"' in admin_client.get("/projects/linked-image").get_data(as_text=True)
+    assert f'value="{link}"' in admin_client.get(f"/admin/projects/{pid}/edit").get_data(as_text=True)
+    assert "img-src 'self' data: https:" in admin_client.get("/").headers["Content-Security-Policy"]
+    admin_client.post(f"/admin/projects/{pid}/edit", data=form(title="Linked Image", thumbnail_url=""))  # box emptied
+    assert get_project(app, pid)["thumbnail"] is None
+
+
+def test_unsafe_thumbnail_links_are_rejected(app, admin_client):
+    for bad in ("javascript:alert(1)", "data:text/html,x", "ftp://x.com/a.png", "not a url"):
+        assert admin_client.post("/admin/projects/new", data=form(title="Bad Link", thumbnail_url=bad)).status_code == 400
+    assert project_id(app, "bad-link") is None

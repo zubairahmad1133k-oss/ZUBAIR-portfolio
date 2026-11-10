@@ -37,7 +37,7 @@
 
     <div class="project-visual {{ project.visual_class }} detail-visual">
       {% if project.thumbnail %}
-      <img class="project-thumb" src="{{ url_for('public.media', filename=project.thumbnail) }}" alt="{{ project.title }} thumbnail">
+      <img class="project-thumb" src="{{ project.thumbnail if project.thumbnail_is_external else url_for('public.media', filename=project.thumbnail) }}" alt="{{ project.title }} thumbnail">
       {% else %}
       <div class="visual-icon">{{ project.icon }}</div>
       {% endif %}

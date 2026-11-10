@@ -141,7 +141,7 @@ def create_app(config_name: str | None = None, overrides: dict | None = None) ->
             "script-src 'self'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src https://fonts.gstatic.com; "
-            "img-src 'self' data:; "
+            "img-src 'self' data: https:; "
             "connect-src 'self'; "
             "base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
         )

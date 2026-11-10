@@ -47,6 +47,7 @@ def _values_from_project(project: Project) -> dict:
         "card_label": project.card_label or "", "link_text": project.link_text or "",
         "demo_url": project.demo_url or "", "github_url": project.github_url or "",
         "docs_url": project.docs_url or "",
+        "thumbnail_url": project.thumbnail if project.thumbnail_is_external else "",
         "is_published": project.is_published, "is_placeholder": project.is_placeholder,
     }
 
@@ -55,7 +56,7 @@ def _default_values() -> dict:
     return {
         "title": "", "category": "", "summary": "", "description": "", "technologies": "",
         "visual_class": "visual-code", "icon": "✦", "card_label": "", "link_text": "",
-        "demo_url": "", "github_url": "", "docs_url": "",
+        "demo_url": "", "github_url": "", "docs_url": "", "thumbnail_url": "",
         "is_published": False, "is_placeholder": False,
     }
 
@@ -86,6 +87,16 @@ def _read_form():
             errors.append(f"{label}: {exc}")
             values[field] = form.get(field, "")
 
+    image_url = form.get("thumbnail_url", "").strip()
+    values["thumbnail_url"] = image_url
+    if image_url:
+        try:
+            clean_http_url(image_url)
+            if len(image_url) > 255:
+                raise ValueError("The link is too long (255 characters max).")
+        except ValueError as exc:
+            errors.append(f"Thumbnail image link: {exc}")
+
     values["is_published"] = form.get("is_published") == "on"
     values["is_placeholder"] = form.get("is_placeholder") == "on"
 
@@ -101,6 +112,7 @@ def _read_form():
 def _db_values(values: dict) -> dict:
     """Empty optional strings become NULL in the database."""
     cleaned = dict(values)
+    cleaned.pop("thumbnail_url", None)  # not a database column; handled separately
     for key in ("card_label", "link_text", "demo_url", "github_url", "docs_url"):
         cleaned[key] = cleaned[key] or None
     return cleaned
@@ -153,7 +165,8 @@ def new():
     last_order = db.session.scalar(db.select(db.func.max(Project.sort_order))) or 0
     project = Project(
         slug=unique_slug(db.session, Project, values["title"]),
-        sort_order=last_order + 1, thumbnail=thumbnail, **_db_values(values),
+        sort_order=last_order + 1, thumbnail=thumbnail or values["thumbnail_url"] or None,
+        **_db_values(values),
     )
     db.session.add(project)
     if project.is_published:
@@ -188,10 +201,15 @@ def edit(project_id):
         setattr(project, key, value)
 
     remove_requested = request.form.get("remove_thumbnail") == "on"
+    link = values["thumbnail_url"]
     if new_thumbnail:
         project.thumbnail = new_thumbnail
     elif remove_requested:
         project.thumbnail = None
+    elif link:
+        project.thumbnail = link
+    elif old_thumbnail and old_thumbnail.startswith(("http://", "https://")):
+        project.thumbnail = None  # the link box was emptied
 
     if project.is_published and not was_published:
         add_notification(KIND_PROJECT_PUBLISHED, f"Project published: {project.title}")
@@ -199,7 +217,8 @@ def edit(project_id):
         add_notification(KIND_PROJECT_UPDATED, f"Project updated: {project.title}")
     db.session.commit()
 
-    if old_thumbnail and old_thumbnail != project.thumbnail:
+    if (old_thumbnail and old_thumbnail != project.thumbnail
+            and not old_thumbnail.startswith(("http://", "https://"))):
         delete_public_file(old_thumbnail)
     flash(f"'{project.title}' saved.", "success")
     return redirect(url_for("admin_projects.index"))
@@ -243,7 +262,8 @@ def delete(project_id):
     title, thumbnail = project.title, project.thumbnail
     db.session.delete(project)
     db.session.commit()
-    delete_public_file(thumbnail)
+    if thumbnail and not thumbnail.startswith(("http://", "https://")):
+        delete_public_file(thumbnail)
     flash(f"'{title}' deleted.", "info")
     return redirect(url_for("admin_projects.index"))
 
